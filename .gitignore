@@ -12,7 +12,13 @@ ltmain.sh
 m4
 missing
 stamp-h1
+test-driver
 
 .deps
+.libs
+*.la
+*.lo
+*.trs
+tests
 Makefile
 Makefile.in
