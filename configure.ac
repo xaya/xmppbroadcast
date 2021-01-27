@@ -24,6 +24,7 @@ AX_CHECK_COMPILE_FLAG([-pedantic], [CXXFLAGS+=" -pedantic"])
 CXXFLAGS+=" -DGLOG_NO_ABBREVIATED_SEVERITIES"
 
 # Public dependencies exposed in the headers.
+AX_PKG_CHECK_MODULES([XAYAUTIL], [libxayautil], [])
 AX_PKG_CHECK_MODULES([GAMECHANNEL], [gamechannel], [])
 
 # Private dependencies for the library parts.
