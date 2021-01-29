@@ -39,6 +39,8 @@
 namespace xmppbroadcast
 {
 
+/* ************************************************************************** */
+
 /**
  * The XMPP MUC client that we use for sending and receiving messages for
  * one or more channels.  This class is the underlying implementation for
@@ -50,6 +52,7 @@ class MucClient : private charon::XmppClient
 public:
 
   class Channel;
+  class Refresher;
 
 private:
 
@@ -118,9 +121,73 @@ public:
    */
   void Disconnect ();
 
+  /**
+   * Runs a "refresh" cycle, which during normal operation should be done
+   * periodically.  This checks to see if the client is disconnected; if it
+   * is, it will try to reconnect.  It also checks for channels that have been
+   * dormant for a long time and cleans them up.
+   */
+  void Refresh ();
+
   using XmppClient::IsConnected;
 
 };
+
+/* ************************************************************************** */
+
+/**
+ * A helper class that runs a thread to periodically call Refresh on a MucClient
+ * instance until it gets destructed.
+ */
+class MucClient::Refresher
+{
+
+private:
+
+  /** The MucClient instance being refreshed.  */
+  MucClient& client;
+
+  /** The approximate interval between refresh calls.  */
+  const std::chrono::nanoseconds intv;
+
+  /** Set to true when the thread should stop.  */
+  bool shouldStop = false;
+
+  /** Mutex for shouldStop and cv.  */
+  std::mutex mut;
+
+  /** Condition variable that gets notified when we should stop.  */
+  std::condition_variable cv;
+
+  /** The thread running the refresh calls.  */
+  std::thread runner;
+
+  /**
+   * Runs the refresh cycle, i.e. what the thread executes.
+   */
+  void Run ();
+
+public:
+
+  /**
+   * Starts a refresher with a default (flag-configured) interval.
+   */
+  explicit Refresher (MucClient& c);
+
+  /**
+   * Starts a refresher with the given interval.
+   */
+  template <typename Rep, typename Period>
+    explicit Refresher (MucClient& c, std::chrono::duration<Rep, Period> i);
+
+  /**
+   * The destructor stops the refresher thread.
+   */
+  ~Refresher ();
+
+};
+
+/* ************************************************************************** */
 
 /**
  * A channel that we are subscribed to in the XMPP client.
@@ -250,6 +317,8 @@ public:
   }
 
 };
+
+/* ************************************************************************** */
 
 } // namespace xmppbroadcast
 

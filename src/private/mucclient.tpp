@@ -54,4 +54,11 @@ template <typename C>
   return res;
 }
 
+template <typename Rep, typename Period>
+  MucClient::Refresher::Refresher (MucClient& c,
+                                   const std::chrono::duration<Rep, Period> i)
+  : client(c), intv(i),
+    runner([this] () { Run (); })
+{}
+
 } // namespace xmppbroadcast

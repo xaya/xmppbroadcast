@@ -155,5 +155,24 @@ TEST_F (MucClientTests, ReceivingMessages)
   channel1.ExpectMessages ({"foo", "bar", "baz"});
 }
 
+TEST_F (MucClientTests, RefreshReconnects)
+{
+  /* The interval must be sufficiently longer than the time it takes
+     to actually get the connection go through.  */
+  constexpr auto intv = std::chrono::milliseconds (500);
+
+  TestClient client("test", 0);
+  ASSERT_TRUE (client.Connect ());
+
+  MucClient::Refresher refresher(client, intv);
+  std::this_thread::sleep_for (intv / 3);
+  client.Disconnect ();
+  std::this_thread::sleep_for (intv / 3);
+  EXPECT_FALSE (client.IsConnected ());
+
+  std::this_thread::sleep_for (intv);
+  EXPECT_TRUE (client.IsConnected ());
+}
+
 } // anonymous namespace
 } // namespace xmppbroadcast

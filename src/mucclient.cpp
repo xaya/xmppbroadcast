@@ -27,6 +27,9 @@
 namespace xmppbroadcast
 {
 
+DEFINE_int32 (xmppbroadcast_refresh_ms, 30'000,
+              "Milliseconds between refresh / reconnection attempts");
+
 /* ************************************************************************** */
 
 MucClient::MucClient (const gloox::JID& j, const std::string& password,
@@ -97,6 +100,47 @@ std::unique_ptr<MucClient::Channel>
 MucClient::CreateChannel (const gloox::JID& j)
 {
   return std::make_unique<Channel> (*this, j);
+}
+
+void
+MucClient::Refresh ()
+{
+  VLOG (1) << "Refresh cycle for MUC client";
+
+  if (!IsConnected ())
+    {
+      LOG (INFO) << "MUC client is disconnected, attempting reconnect...";
+      Connect ();
+    }
+}
+
+/* ************************************************************************** */
+
+MucClient::Refresher::Refresher (MucClient& c)
+  : Refresher(c, std::chrono::milliseconds (FLAGS_xmppbroadcast_refresh_ms))
+{}
+
+MucClient::Refresher::~Refresher ()
+{
+  {
+    std::lock_guard<std::mutex> lock(mut);
+    shouldStop = true;
+    cv.notify_all ();
+  }
+  runner.join ();
+}
+
+void
+MucClient::Refresher::Run ()
+{
+  std::unique_lock<std::mutex> lock(mut);
+  while (!shouldStop)
+    {
+      lock.unlock ();
+      client.Refresh ();
+      lock.lock ();
+      cv.wait_for (lock, intv);
+    }
 }
 
 /* ************************************************************************** */
