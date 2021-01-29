@@ -15,7 +15,9 @@ Game-channel applications can use the XMPP broadcast in two ways:
    that can be used when interacting with the game-channel library.
 
 1. As a local RPC server:  It is also possible to launch a local
-   RPC server (through the library or a stand-alone binary),
+   RPC server (through the library's [`RpcServer`
+   class](https://github.com/xaya/xmppbroadcast/blob/master/src/rpcserver.hpp)
+   or a stand-alone binary),
    which the game channel can connect to using the standard
    [`RpcBroadcast`](https://github.com/xaya/libxayagame/blob/master/gamechannel/rpcbroadcast.hpp).
    This allows to "XMPP-ify" existing applications in a modular way.

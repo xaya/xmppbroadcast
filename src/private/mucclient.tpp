@@ -20,6 +20,8 @@
 
 #include <glog/logging.h>
 
+#include <typeinfo>
+
 namespace xmppbroadcast
 {
 
@@ -49,7 +51,9 @@ template <typename C>
 
   auto newChannel = CreateChannel (jid);
   auto* res = dynamic_cast<C*> (newChannel.get ());
-  CHECK (res != nullptr);
+  CHECK (res != nullptr)
+      << "Not of type " << typeid (C).name ()
+      << ": " << typeid (newChannel.get ()).name ();
   channels.emplace (jid, std::move (newChannel));
   return res;
 }
