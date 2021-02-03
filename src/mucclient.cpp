@@ -32,8 +32,9 @@ DEFINE_int32 (xmppbroadcast_refresh_ms, 30'000,
 
 /* ************************************************************************** */
 
-MucClient::MucClient (const gloox::JID& j, const std::string& password,
-                      const std::string& g, const std::string& s)
+MucClient::MucClient (const std::string& g,
+                      const gloox::JID& j, const std::string& password,
+                      const std::string& s)
   : XmppClient(j, password), gameId(g), server(s)
 {
   RunWithClient ([] (gloox::Client& c)

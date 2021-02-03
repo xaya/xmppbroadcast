@@ -48,8 +48,9 @@ public:
    * use the given game ID for the channels, and use a particular MUC
    * service.
    */
-  explicit RpcServer (const std::string& jid, const std::string& password,
-                      const std::string& gameId, const std::string& mucServer);
+  explicit RpcServer (const std::string& gameId,
+                      const std::string& jid, const std::string& password,
+                      const std::string& mucServer);
 
   ~RpcServer ();
 

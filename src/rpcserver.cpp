@@ -325,9 +325,10 @@ private:
 
 public:
 
-  explicit Impl (const std::string& jid, const std::string& password,
-                 const std::string& gameId, const std::string& mucServer)
-    : client(jid, password, gameId, mucServer)
+  explicit Impl (const std::string& gameId,
+                 const std::string& jid, const std::string& password,
+                 const std::string& mucServer)
+    : client(gameId, jid, password, mucServer)
   {}
 
   ~Impl ()
@@ -341,10 +342,11 @@ public:
 
 };
 
-RpcServer::RpcServer (const std::string& jid, const std::string& password,
-                      const std::string& gameId, const std::string& mucServer)
+RpcServer::RpcServer (const std::string& gameId,
+                      const std::string& jid, const std::string& password,
+                      const std::string& mucServer)
 {
-  impl = std::make_unique<Impl> (jid, password, gameId, mucServer);
+  impl = std::make_unique<Impl> (gameId, jid, password, mucServer);
 }
 
 RpcServer::~RpcServer ()

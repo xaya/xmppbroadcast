@@ -77,8 +77,9 @@ main (int argc, char** argv)
       if (FLAGS_port == 0)
         throw UsageError ("--port must be set");
 
-      xmppbroadcast::RpcServer srv(FLAGS_jid, FLAGS_password,
-                                   FLAGS_game_id, FLAGS_muc);
+      xmppbroadcast::RpcServer srv(FLAGS_game_id,
+                                   FLAGS_jid, FLAGS_password,
+                                   FLAGS_muc);
       srv.Start (FLAGS_port, FLAGS_listen_locally);
       srv.Wait ();
 

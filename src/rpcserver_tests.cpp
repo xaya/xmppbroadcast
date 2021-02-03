@@ -107,8 +107,8 @@ class TestServer : public RpcServer
 public:
 
   TestServer ()
-    : RpcServer(GetTestJid (0).full (), GetPassword (0),
-                "test", GetServerConfig ().muc)
+    : RpcServer("test", GetTestJid (0).full (), GetPassword (0),
+                GetServerConfig ().muc)
   {}
 
   void

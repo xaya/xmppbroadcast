@@ -87,7 +87,7 @@ protected:
 public:
 
   explicit TestClient (const std::string& gameId, const unsigned n)
-    : MucClient(GetTestJid (n), GetPassword (n), gameId, GetServerConfig ().muc)
+    : MucClient(gameId, GetTestJid (n), GetPassword (n), GetServerConfig ().muc)
   {}
 
   /**

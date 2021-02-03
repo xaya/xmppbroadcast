@@ -93,8 +93,9 @@ public:
    * Sets up the client with the given data, but does not yet actually
    * try to connect.
    */
-  explicit MucClient (const gloox::JID& j, const std::string& password,
-                      const std::string& g, const std::string& s);
+  explicit MucClient (const std::string& g,
+                      const gloox::JID& j, const std::string& password,
+                      const std::string& s);
 
   virtual ~MucClient ();
 
