@@ -18,11 +18,42 @@
 
 #include "config.h"
 
+#include "rpcserver.hpp"
+
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 
 #include <cstdlib>
 #include <iostream>
+
+namespace
+{
+
+DEFINE_string (game_id, "", "game ID for which to run broadcasts");
+
+DEFINE_string (jid, "", "JID for the XMPP connection");
+DEFINE_string (password, "", "password for the XMPP connection");
+DEFINE_string (muc, "", "XMPP MUC service JID");
+
+DEFINE_int32 (port, 0, "port for the JSON-RPC broadcast server");
+DEFINE_bool (listen_locally, true,
+             "whether the RPC server should listen locally");
+
+/**
+ * Exception thrown for invalid usage.
+ */
+class UsageError : public std::runtime_error
+{
+
+public:
+
+  explicit UsageError (const std::string& msg)
+    : std::runtime_error(msg)
+  {}
+
+};
+
+} // anonymous namespace
 
 int
 main (int argc, char** argv)
@@ -35,7 +66,28 @@ main (int argc, char** argv)
 
   try
     {
+      if (FLAGS_game_id.empty ())
+        throw UsageError ("--game_id must be set");
+      if (FLAGS_jid.empty ())
+        throw UsageError ("--jid must be set");
+      if (FLAGS_password.empty ())
+        throw UsageError ("--password must be set");
+      if (FLAGS_muc.empty ())
+        throw UsageError ("--muc must be set");
+      if (FLAGS_port == 0)
+        throw UsageError ("--port must be set");
+
+      xmppbroadcast::RpcServer srv(FLAGS_jid, FLAGS_password,
+                                   FLAGS_game_id, FLAGS_muc);
+      srv.Start (FLAGS_port, FLAGS_listen_locally);
+      srv.Wait ();
+
       return EXIT_SUCCESS;
+    }
+  catch (const UsageError& exc)
+    {
+      std::cerr << "Error: " << exc.what () << std::endl;
+      return EXIT_FAILURE;
     }
   catch (const std::exception& exc)
     {
