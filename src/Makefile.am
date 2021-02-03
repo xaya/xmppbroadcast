@@ -21,9 +21,11 @@ libxmppbroadcast_la_LIBADD = \
 libxmppbroadcast_la_SOURCES = \
   mucclient.cpp \
   rpcserver.cpp \
-  stanzas.cpp
+  stanzas.cpp \
+  xmppbroadcast.cpp
 xmppbroadcast_HEADERS = \
-  rpcserver.hpp
+  rpcserver.hpp \
+  xmppbroadcast.hpp
 noinst_HEADERS = \
   private/mucclient.hpp private/mucclient.tpp \
   private/stanzas.hpp \
@@ -40,12 +42,12 @@ check_PROGRAMS = tests
 TESTS = tests
 
 tests_CXXFLAGS = \
-  $(XAYAUTIL_CFLAGS) $(CHARON_CFLAGS) \
+  $(XAYAUTIL_CFLAGS) $(GAMECHANNEL_CFLAGS) $(CHARON_CFLAGS) \
   $(JSON_CFLAGS) $(JSONRPCCPPSERVER_CFLAGS) $(JSONRPCCPPCLIENT_CFLAGS) \
   $(GLOG_CFLAGS) $(GFLAGS_CFLAGS) $(GTEST_CFLAGS)
 tests_LDADD = \
   $(builddir)/libxmppbroadcast.la \
-  $(XAYAUTIL_LIBS) $(CHARON_LIBS) \
+  $(XAYAUTIL_LIBS) $(GAMECHANNEL_LIBS) $(CHARON_LIBS) \
   $(JSON_LIBS) $(JSONRPCCPPSERVER_LIBS) $(JSONRPCCPPCLIENT_LIBS) \
   $(GLOG_LIBS) $(GFLAGS_LIBS) $(GTEST_LIBS)
 tests_SOURCES = \
@@ -53,7 +55,8 @@ tests_SOURCES = \
   \
   mucclient_tests.cpp \
   rpcserver_tests.cpp \
-  stanzas_tests.cpp
+  stanzas_tests.cpp \
+  xmppbroadcast_tests.cpp
 check_HEADERS = \
   testutils.hpp
 

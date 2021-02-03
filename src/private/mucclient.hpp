@@ -127,8 +127,11 @@ public:
    * periodically.  This checks to see if the client is disconnected; if it
    * is, it will try to reconnect.  It also checks for channels that have been
    * dormant for a long time and cleans them up.
+   *
+   * Subclasses can override this method to add their own logic in addition
+   * if they need custom refreshing.
    */
-  void Refresh ();
+  virtual void Refresh ();
 
   using XmppClient::IsConnected;
 

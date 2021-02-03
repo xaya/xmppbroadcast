@@ -9,8 +9,9 @@ that uses [XMPP](https://xmpp.org/) for the underlying communication.
 
 Game-channel applications can use the XMPP broadcast in two ways:
 
-1. As a library:  The project provides an `XmppBroadcast` class, which
-   directly implements an
+1. As a library:  The project provides an [`XmppBroadcast`
+  class](https://github.com/xaya/xmppbroadcast/blob/master/src/xmppbroadcast.hpp),
+  which directly implements an
   [`OffChainBroadcast`](https://github.com/xaya/libxayagame/blob/master/gamechannel/broadcast.hpp)
    that can be used when interacting with the game-channel library.
 
