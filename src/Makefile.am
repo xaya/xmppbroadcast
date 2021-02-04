@@ -58,7 +58,9 @@ tests_SOURCES = \
   stanzas_tests.cpp \
   xmppbroadcast_tests.cpp
 check_HEADERS = \
-  testutils.hpp
+  testutils.hpp \
+  \
+  xmppbroadcast_tests.hpp
 
 rpc-stubs/broadcastrpcclient.h: $(srcdir)/rpc-stubs/broadcast.json
 	jsonrpcstub "$<" --cpp-client=BroadcastRpcClient --cpp-client-file="$@"

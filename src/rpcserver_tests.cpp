@@ -20,13 +20,16 @@
 
 #include "rpc-stubs/broadcastrpcclient.h"
 #include "testutils.hpp"
+#include "xmppbroadcast_tests.hpp"
 
+#include <gamechannel/rpcbroadcast.hpp>
 #include <xayautil/hash.hpp>
 
 #include <json/json.h>
 #include <jsonrpccpp/client/connectors/httpclient.h>
 #include <jsonrpccpp/common/exception.h>
 
+#include <gflags/gflags.h>
 #include <glog/logging.h>
 #include <gtest/gtest.h>
 
@@ -36,11 +39,52 @@
 
 namespace xmppbroadcast
 {
+
+DECLARE_int32 (xmppbroadcast_receive_timeout_ms);
+
 namespace
 {
 
 /** The port we use for the test server.  */
 constexpr int PORT = 29'183;
+
+/**
+ * Returns the full endpoint of the local server.
+ */
+std::string
+GetEndpoint ()
+{
+  std::ostringstream res;
+  res << "http://localhost:" << PORT;
+  return res.str ();
+}
+
+/**
+ * Parses a given string as JSON.
+ */
+Json::Value
+ParseJson (const std::string& str)
+{
+  std::istringstream in(str);
+  Json::Value res;
+  in >> res;
+  return res;
+}
+
+/**
+ * RpcBroadcast (from game channels) subclass that connects to our server
+ * and stores received messages into a queue.
+ */
+class TestRpcBroadcast : public TestBroadcast<xaya::RpcBroadcast>
+{
+
+public:
+
+  explicit TestRpcBroadcast (const xaya::uint256& id)
+    : TestBroadcast<xaya::RpcBroadcast>(GetEndpoint (), id)
+  {}
+
+};
 
 /**
  * Wrapper around the base BroadcastRpcClient that also contains the
@@ -56,17 +100,6 @@ private:
 
   /** The actual RPC client.  */
   BroadcastRpcClient rpc;
-
-  /**
-   * Returns the full endpoint of the local server.
-   */
-  static std::string
-  GetEndpoint ()
-  {
-    std::ostringstream res;
-    res << "http://localhost:" << PORT;
-    return res.str ();
-  }
 
 public:
 
@@ -84,18 +117,6 @@ public:
   }
 
 };
-
-/**
- * Parses a given string as JSON.
- */
-Json::Value
-ParseJson (const std::string& str)
-{
-  std::istringstream in(str);
-  Json::Value res;
-  in >> res;
-  return res;
-}
 
 /**
  * RpcServer instance used in the test.  It already uses our test
@@ -180,7 +201,7 @@ TEST_F (RpcServerTests, StopNotification)
 TEST_F (RpcServerTests, Errors)
 {
   /* The server is not started.  */
-  EXPECT_THROW (client->send (id1, "foo"), jsonrpc::JsonRpcException);
+  EXPECT_THROW (client->send (id1, "Zm9v"), jsonrpc::JsonRpcException);
   EXPECT_THROW (client->getseq (id1), jsonrpc::JsonRpcException);
   EXPECT_THROW (client->receive (id1, 0), jsonrpc::JsonRpcException);
 
@@ -191,13 +212,14 @@ TEST_F (RpcServerTests, Errors)
   /* send is just a notification, so we don't expect a result (not even
      an exception thrown).  The server should just ignore it and not
      crash, though.  */
-  client->send ("x", "foo");
+  client->send ("x", "Zm9v");
+  client->send (id1, "invalid base64");
 
   /* Make sure the server is fine.  */
-  client->send (id1, "bar");
+  client->send (id1, "YmFy");
   EXPECT_EQ (client->receive (id1, 0), ParseJson (R"({
     "seq": 1,
-    "messages": ["bar"]
+    "messages": ["YmFy"]
   })"));
 }
 
@@ -206,18 +228,18 @@ TEST_F (RpcServerTests, BasicReceiving)
   srv.Start ();
   EXPECT_EQ (client->getseq (id1), ParseJson (R"({"seq": 0})"));
 
-  client->send (id1, "foo");
-  client->send (id1, "bar");
+  client->send (id1, "Zm9v");
+  client->send (id1, "YmFy");
   SleepSome ();
 
   EXPECT_EQ (client->getseq (id1), ParseJson (R"({"seq": 2})"));
   EXPECT_EQ (client->receive (id1, 0), ParseJson (R"({
     "seq": 2,
-    "messages": ["foo", "bar"]
+    "messages": ["Zm9v", "YmFy"]
   })"));
   EXPECT_EQ (client->receive (id1, 1), ParseJson (R"({
     "seq": 2,
-    "messages": ["bar"]
+    "messages": ["YmFy"]
   })"));
 }
 
@@ -230,12 +252,12 @@ TEST_F (RpcServerTests, ReceiveWaits)
     {
       TestRpcClient client2;
       SleepSome ();
-      client2->send (id1, "baz");
+      client2->send (id1, "YmF6");
     });
 
   EXPECT_EQ (client->receive (id1, 0), ParseJson (R"({
     "seq": 1,
-    "messages": ["baz"]
+    "messages": ["YmF6"]
   })"));
   sender.join ();
 }
@@ -244,19 +266,43 @@ TEST_F (RpcServerTests, MultipleChannels)
 {
   srv.Start ();
 
-  client->send (id1, "first");
-  client->send (id2, "second");
-  client->send (id1, "third");
+  client->send (id1, "Zm9v");
+  client->send (id2, "YmFy");
+  client->send (id1, "YmF6");
   SleepSome ();
 
   EXPECT_EQ (client->receive (id1, 0), ParseJson (R"({
     "seq": 2,
-    "messages": ["first", "third"]
+    "messages": ["Zm9v", "YmF6"]
   })"));
   EXPECT_EQ (client->receive (id2, 0), ParseJson (R"({
     "seq": 1,
-    "messages": ["second"]
+    "messages": ["YmFy"]
   })"));
+}
+
+TEST_F (RpcServerTests, CompatibilityToXmppBroadcast)
+{
+  /* This test connects a direct XmppBroadcast and a game-channel
+     RpcBroadcast going through our server together.  Both of them
+     should be able to talk to each other.  */
+
+  FLAGS_xmppbroadcast_receive_timeout_ms = 100;
+
+  srv.Start ();
+
+  xaya::uint256 id;
+  CHECK (id.FromHex (id1));
+
+  TestRpcBroadcast bc1(id);
+  TestXmppBroadcast bc2(1, id);
+  SleepSome ();
+
+  bc1.SendMessage ("foo");
+  bc2.ExpectMessages ({"foo"});
+  bc2.SendMessage ("bar");
+  bc1.ExpectMessages ({"foo", "bar"});
+  bc2.ExpectMessages ({"bar"});
 }
 
 } // anonymous namespace

@@ -129,6 +129,51 @@ public:
 
 };
 
+/**
+ * Subclass of a given OffChainBroadcast used for testing.  It keeps hold
+ * of a ReceivedMessages instance, and puts received messages in there.
+ */
+template <typename T>
+  class TestBroadcast : public T
+{
+
+private:
+
+  /** Received messages are stored here.  */
+  ReceivedMessages messages;
+
+protected:
+
+  void
+  FeedMessage (const std::string& msg) override
+  {
+    messages.Add (msg);
+  }
+
+public:
+
+  template <typename ...Args>
+    explicit TestBroadcast (Args... args)
+    : T(args...)
+  {
+    T::Start ();
+  }
+
+  ~TestBroadcast ()
+  {
+    T::Stop ();
+  }
+
+  void
+  ExpectMessages (const std::vector<std::string>& expected)
+  {
+    messages.Expect (expected);
+  }
+
+  using T::SendMessage;
+
+};
+
 } // namespace xmppbroadcast
 
 #endif // XMPPBROADCAST_TESTUTILS_HPP

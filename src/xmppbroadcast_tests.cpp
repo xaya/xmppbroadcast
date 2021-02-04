@@ -16,60 +16,25 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "xmppbroadcast.hpp"
-
-#include "testutils.hpp"
+#include "xmppbroadcast_tests.hpp"
 
 #include <xayautil/hash.hpp>
-#include <xayautil/uint256.hpp>
 
 #include <glog/logging.h>
 #include <gtest/gtest.h>
 
 namespace xmppbroadcast
 {
+
+TestXmppBroadcast::TestXmppBroadcast (const unsigned n, const xaya::uint256& id)
+  : TestBroadcast<XmppBroadcast>(
+        id, "test",
+        GetTestJid (n).full (), GetPassword (n),
+        GetServerConfig ().muc)
+{}
+
 namespace
 {
-
-/**
- * Custom broadcast instance for testing.  It uses our XMPP test accounts,
- * and stores received messages into a ReceivedMessages instance.
- */
-class TestBroadcast : public XmppBroadcast
-{
-
-private:
-
-  /** Received messages are stored here.  */
-  ReceivedMessages messages;
-
-protected:
-
-  void
-  FeedMessage (const std::string& msg) override
-  {
-    messages.Add (msg);
-  }
-
-public:
-
-  TestBroadcast (const unsigned n, const xaya::uint256& id)
-    : XmppBroadcast(id, "test",
-                    GetTestJid (n).full (), GetPassword (n),
-                    GetServerConfig ().muc)
-  {
-    Start ();
-  }
-
-  void
-  ExpectMessages (const std::vector<std::string>& expected)
-  {
-    messages.Expect (expected);
-  }
-
-  using XmppBroadcast::SendMessage;
-
-};
 
 class XmppBroadcastTests : public testing::Test
 {
@@ -88,8 +53,8 @@ const xaya::uint256 XmppBroadcastTests::id2 = xaya::SHA256::Hash ("bar");
 
 TEST_F (XmppBroadcastTests, BasicMessageExchange)
 {
-  TestBroadcast bc1(0, id1);
-  TestBroadcast bc2(1, id1);
+  TestXmppBroadcast bc1(0, id1);
+  TestXmppBroadcast bc2(1, id1);
   SleepSome ();
 
   bc1.SendMessage ("foo");
@@ -101,9 +66,9 @@ TEST_F (XmppBroadcastTests, BasicMessageExchange)
 
 TEST_F (XmppBroadcastTests, MultipleChannels)
 {
-  TestBroadcast bc1(0, id1);
-  TestBroadcast bc2(1, id1);
-  TestBroadcast bc3(2, id2);
+  TestXmppBroadcast bc1(0, id1);
+  TestXmppBroadcast bc2(1, id1);
+  TestXmppBroadcast bc3(2, id2);
   SleepSome ();
 
   bc1.SendMessage ("foo");
@@ -117,8 +82,8 @@ TEST_F (XmppBroadcastTests, MultipleChannels)
 
 TEST_F (XmppBroadcastTests, IntermittentStop)
 {
-  TestBroadcast bc1(0, id1);
-  TestBroadcast bc2(1, id1);
+  TestXmppBroadcast bc1(0, id1);
+  TestXmppBroadcast bc2(1, id1);
 
   bc2.Stop ();
   SleepSome ();

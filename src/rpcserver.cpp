@@ -21,10 +21,13 @@
 #include "private/mucclient.hpp"
 #include "rpc-stubs/broadcastrpcserverstub.h"
 
+#include <xayautil/base64.hpp>
+
 #include <jsonrpccpp/common/errors.h>
 #include <jsonrpccpp/common/exception.h>
 #include <jsonrpccpp/server/connectors/httpserver.h>
 
+#include <gflags/gflags.h>
 #include <glog/logging.h>
 
 #include <chrono>
@@ -36,6 +39,9 @@
 
 namespace xmppbroadcast
 {
+
+DEFINE_int32 (xmppbroadcast_receive_timeout_ms, 3'000,
+              "server-side timeout for receive calls in milliseconds");
 
 /* ************************************************************************** */
 
@@ -50,9 +56,6 @@ class MsgChannel : public MucClient::Channel
 {
 
 private:
-
-  /** Timeout for receive calls.  */
-  static constexpr auto RECV_TIMEOUT = std::chrono::seconds (3);
 
   /** All received messages.  */
   std::vector<std::string> messages;
@@ -112,7 +115,11 @@ MsgChannel::Receive (size_t& seq)
 {
   std::unique_lock<std::mutex> lock(mut);
   if (messages.size () <= seq)
-    cv.wait_for (lock, RECV_TIMEOUT);
+    {
+      const auto timeout = std::chrono::milliseconds (
+          FLAGS_xmppbroadcast_receive_timeout_ms);
+      cv.wait_for (lock, timeout);
+    }
 
   std::vector<std::string> res;
   for (unsigned i = seq; i < messages.size (); ++i)
@@ -200,7 +207,14 @@ RealServer::GetChannel (const std::string& hexId)
 void
 RealServer::send (const std::string& channel, const std::string& message)
 {
-  GetChannel (channel).Send (message);
+  std::string decoded;
+  if (!xaya::DecodeBase64 (message, decoded))
+    {
+      LOG (WARNING) << "Failed to decode base64, ignoring message: " << message;
+      return;
+    }
+
+  GetChannel (channel).Send (decoded);
 }
 
 Json::Value
@@ -222,7 +236,7 @@ RealServer::receive (const std::string& channel, const int fromseq)
 
   Json::Value msgArr(Json::arrayValue);
   for (const auto& m : msg)
-    msgArr.append (m);
+    msgArr.append (xaya::EncodeBase64 (m));
 
   Json::Value res(Json::objectValue);
   res["messages"] = msgArr;

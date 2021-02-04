@@ -36,3 +36,8 @@ Each channel message is encoded into a custom stanza tag of this form:
 
 The tag (especially the encoded payload) is created with [Charon's `xmldata`
 library](https://github.com/xaya/charon/blob/master/src/xmldata.hpp).
+
+On the XMPP side, the encoded payload corresponds directly to the
+raw broadcast data from the game-channels library.  In the RPC server,
+this data is additionally base64-encoded on the side of the RPC client
+(but not when sent to XMPP).
