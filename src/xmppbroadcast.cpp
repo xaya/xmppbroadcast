@@ -24,6 +24,10 @@
 
 #include <functional>
 
+/* Windows systems define a GetMessage macro, which makes this file fail to
+   compile because of SendMessage in OffChainBroadcast.  */
+#undef SendMessage
+
 namespace xmppbroadcast
 {
 
