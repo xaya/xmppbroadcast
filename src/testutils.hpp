@@ -71,6 +71,11 @@ struct ServerConfiguration
 const ServerConfiguration& GetServerConfig ();
 
 /**
+ * Returns the path to the trusted CA file for the test server.
+ */
+std::string GetTestCA ();
+
+/**
  * Returns the JID of the n-th test account from the selected server config.
  */
 gloox::JID GetTestJid (unsigned n);
@@ -156,7 +161,8 @@ public:
     explicit TestBroadcast (Args... args)
     : T(args...)
   {
-    T::Start ();
+    /* We do not explicitly start the underlying broadcast here, as some tests
+       need to SetRootCA before starting.  */
   }
 
   ~TestBroadcast ()

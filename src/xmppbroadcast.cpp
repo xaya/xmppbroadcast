@@ -148,6 +148,13 @@ XmppBroadcast::SendMessage (const std::string& msg)
 }
 
 void
+XmppBroadcast::SetRootCA (const std::string& path)
+{
+  CHECK (!impl->IsConnected ()) << "XmppBroadcast is already connected";
+  impl->SetRootCA (path);
+}
+
+void
 XmppBroadcast::Start ()
 {
   if (!impl->Connect ())

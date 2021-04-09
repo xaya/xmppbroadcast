@@ -20,12 +20,16 @@
 
 #include <gtest/gtest.h>
 
+#include <experimental/filesystem>
+
 #include <chrono>
 #include <sstream>
 #include <thread>
 
 namespace xmppbroadcast
 {
+
+namespace fs = std::experimental::filesystem;
 
 namespace
 {
@@ -50,6 +54,15 @@ const ServerConfiguration&
 GetServerConfig ()
 {
   return LOCAL_SERVER;
+}
+
+std::string
+GetTestCA ()
+{
+#ifndef CHARON_PREFIX
+#error Charon installation prefix not defined
+#endif // CHARON_PREFIX
+  return fs::path (CHARON_PREFIX) / "share" / "charon" / "testenv.pem";
 }
 
 gloox::JID

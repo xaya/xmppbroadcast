@@ -379,6 +379,13 @@ RpcServer::Impl::RequestStop ()
 }
 
 void
+RpcServer::SetRootCA (const std::string& path)
+{
+  CHECK (impl->server == nullptr) << "Server is already started";
+  impl->client.SetRootCA (path);
+}
+
+void
 RpcServer::Start (const int port, const bool onlyLocal)
 {
   CHECK (impl->server == nullptr) << "Server is already started";

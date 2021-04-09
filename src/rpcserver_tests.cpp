@@ -82,7 +82,9 @@ public:
 
   explicit TestRpcBroadcast (const xaya::uint256& id)
     : TestBroadcast<xaya::RpcBroadcast>(GetEndpoint (), id)
-  {}
+  {
+    Start ();
+  }
 
 };
 
@@ -130,7 +132,9 @@ public:
   TestServer ()
     : RpcServer("test", GetTestJid (0).full (), GetPassword (0),
                 GetServerConfig ().muc)
-  {}
+  {
+    SetRootCA (GetTestCA ());
+  }
 
   void
   Start ()

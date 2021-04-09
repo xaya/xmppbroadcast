@@ -66,6 +66,11 @@ public:
   XmppBroadcast (const XmppBroadcast&) = delete;
   void operator= (const XmppBroadcast&) = delete;
 
+  /**
+   * Sets the trusted root CA for the XMPP TLS connection.
+   */
+  void SetRootCA (const std::string& path);
+
   /* We use our own custom start/stop, which connects the XMPP client
      and runs a refresher.  The XMPP receiving thread will push messages
      to us, which we feed back to OffChainBroadcast.  */

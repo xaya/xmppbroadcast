@@ -38,6 +38,12 @@ AX_PKG_CHECK_MODULES([CHARON], [], [charon gloox])
 PKG_CHECK_MODULES([JSONRPCCPPCLIENT], [libjsonrpccpp-client])
 PKG_CHECK_MODULES([GTEST], [gmock gtest_main])
 
+# FIXME: We need the Charon installation prefix, since we want to
+# access the testenv.pem certificate installed there.  For now, we
+# just assume it is the default /usr/local, but ideally we should detect
+# it for Charon itself.
+AC_SUBST(CHARON_PREFIX, /usr/local)
+
 AC_CONFIG_FILES([
   Makefile \
   src/Makefile

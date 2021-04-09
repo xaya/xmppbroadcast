@@ -31,7 +31,10 @@ TestXmppBroadcast::TestXmppBroadcast (const unsigned n, const xaya::uint256& id)
         id, "test",
         GetTestJid (n).full (), GetPassword (n),
         GetServerConfig ().muc)
-{}
+{
+  SetRootCA (GetTestCA ());
+  Start ();
+}
 
 namespace
 {

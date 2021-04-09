@@ -134,6 +134,7 @@ public:
   virtual void Refresh ();
 
   using XmppClient::IsConnected;
+  using XmppClient::SetRootCA;
 
 };
 

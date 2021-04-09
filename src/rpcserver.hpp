@@ -59,6 +59,11 @@ public:
   void operator= (const RpcServer&) = delete;
 
   /**
+   * Sets the trusted root CA for the XMPP TLS connection.
+   */
+  void SetRootCA (const std::string& path);
+
+  /**
    * Starts the server.  This connects the XMPP client and makes the
    * server listen for connections on the given port.
    */

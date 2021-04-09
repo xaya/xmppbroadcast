@@ -88,7 +88,9 @@ public:
 
   explicit TestClient (const std::string& gameId, const unsigned n)
     : MucClient(gameId, GetTestJid (n), GetPassword (n), GetServerConfig ().muc)
-  {}
+  {
+    SetRootCA (GetTestCA ());
+  }
 
   /**
    * Retrieves the channel for a given ID, and expects it to be there.

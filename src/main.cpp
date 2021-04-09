@@ -34,6 +34,8 @@ DEFINE_string (game_id, "", "game ID for which to run broadcasts");
 DEFINE_string (jid, "", "JID for the XMPP connection");
 DEFINE_string (password, "", "password for the XMPP connection");
 DEFINE_string (muc, "", "XMPP MUC service JID");
+DEFINE_string (cafile, "",
+               "if set, use this file as CA trust root of the system default");
 
 DEFINE_int32 (port, 0, "port for the JSON-RPC broadcast server");
 DEFINE_bool (listen_locally, true,
@@ -80,6 +82,8 @@ main (int argc, char** argv)
       xmppbroadcast::RpcServer srv(FLAGS_game_id,
                                    FLAGS_jid, FLAGS_password,
                                    FLAGS_muc);
+      if (!FLAGS_cafile.empty ())
+        srv.SetRootCA (FLAGS_cafile);
       srv.Start (FLAGS_port, FLAGS_listen_locally);
       srv.Wait ();
 
