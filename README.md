@@ -12,7 +12,7 @@ Game-channel applications can use the XMPP broadcast in two ways:
 1. As a library:  The project provides an [`XmppBroadcast`
   class](https://github.com/xaya/xmppbroadcast/blob/master/src/xmppbroadcast.hpp),
   which directly implements an
-  [`OffChainBroadcast`](https://github.com/xaya/libxayagame/blob/master/gamechannel/broadcast.hpp)
+  [`ReceivingOffChainBroadcast`](https://github.com/xaya/libxayagame/blob/master/gamechannel/recvbroadcast.hpp)
    that can be used when interacting with the game-channel library.
 
 1. As a local RPC server:  It is also possible to launch a local

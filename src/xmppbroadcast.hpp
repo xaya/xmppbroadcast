@@ -1,6 +1,6 @@
 /*
     xmppbroadcast - XMPP communication for game channels
-    Copyright (C) 2021  Autonomous Worlds Ltd
+    Copyright (C) 2021-2022  Autonomous Worlds Ltd
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
 #ifndef XMPPBROADCAST_XMPPBROADCAST_HPP
 #define XMPPBROADCAST_XMPPBROADCAST_HPP
 
-#include <gamechannel/broadcast.hpp>
+#include <gamechannel/recvbroadcast.hpp>
+#include <gamechannel/syncmanager.hpp>
 
 #include <memory>
 #include <string>
@@ -28,10 +29,10 @@ namespace xmppbroadcast
 {
 
 /**
- * An OffChainBroadcast for game channels that connects to an XMPP server
- * and uses a MUC room for broadcasting and receiving messages.
+ * A ReceivingOffChainBroadcast for game channels that connects to an XMPP
+ * server and uses a MUC room for broadcasting and receiving messages.
  */
-class XmppBroadcast : public xaya::OffChainBroadcast
+class XmppBroadcast : public xaya::ReceivingOffChainBroadcast
 {
 
 private:
@@ -57,7 +58,7 @@ protected:
 public:
 
   explicit XmppBroadcast (
-      xaya::ChannelManager& cm, const std::string& gameId,
+      xaya::SynchronisedChannelManager& cm, const std::string& gameId,
       const std::string& jid, const std::string& password,
       const std::string& mucServer);
   ~XmppBroadcast ();

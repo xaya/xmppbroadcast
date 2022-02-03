@@ -25,7 +25,7 @@ CXXFLAGS+=" -DGLOG_NO_ABBREVIATED_SEVERITIES"
 
 # Public dependencies exposed in the headers.
 AX_PKG_CHECK_MODULES([XAYAUTIL], [libxayautil], [])
-AX_PKG_CHECK_MODULES([GAMECHANNEL], [gamechannel], [])
+AX_PKG_CHECK_MODULES([GAMECHANNEL], [channelcore gamechannel], [])
 
 # Private dependencies for the library parts.
 AX_PKG_CHECK_MODULES([JSON], [], [jsoncpp])

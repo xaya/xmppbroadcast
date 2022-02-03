@@ -1,6 +1,6 @@
 /*
     xmppbroadcast - XMPP communication for game channels
-    Copyright (C) 2021  Autonomous Worlds Ltd
+    Copyright (C) 2021-2022  Autonomous Worlds Ltd
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -114,11 +114,11 @@ XmppBroadcast::Impl::CreateChannel (const gloox::JID& j)
 }
 
 XmppBroadcast::XmppBroadcast (
-    xaya::ChannelManager& cm,
+    xaya::SynchronisedChannelManager& cm,
     const std::string& gameId,
     const std::string& jid, const std::string& password,
     const std::string& mucServer)
-  : xaya::OffChainBroadcast(cm)
+  : xaya::ReceivingOffChainBroadcast(cm)
 {
   impl = std::make_unique<Impl> (*this, gameId, jid, password, mucServer);
 }
@@ -128,7 +128,7 @@ XmppBroadcast::XmppBroadcast (
     const std::string& gameId,
     const std::string& jid, const std::string& password,
     const std::string& mucServer)
-  : xaya::OffChainBroadcast(id)
+  : xaya::ReceivingOffChainBroadcast(id)
 {
   impl = std::make_unique<Impl> (*this, gameId, jid, password, mucServer);
 }
